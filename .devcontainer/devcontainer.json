@@ -1,0 +1,22 @@
+{
+    "image": "pytorch/pytorch:2.6.0-cuda12.6-cudnn9-runtime",
+    "name": "off-road-terrain-seg-benchmark",
+    "runArgs": [
+        "--name", "off-road-terrain-seg-benchmark",
+        "--net", "host",
+        "--gpus", "all",
+        "--shm-size=16g",
+        "-e", "PYTHONUNBUFFERED=1",
+        "-e", "DISPLAY=:0"
+    ],
+    "postCreateCommand": "bash -c 'apt-get update && apt-get install -y git libgl1 libglib2.0-0 && pip install -r requirements.txt'",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    }
+
+}
