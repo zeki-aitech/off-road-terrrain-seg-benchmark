@@ -9,7 +9,6 @@ sys.path.append(str(Path(__file__).parent.parent))
 from src.data.dataset_registry import get_converter
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(

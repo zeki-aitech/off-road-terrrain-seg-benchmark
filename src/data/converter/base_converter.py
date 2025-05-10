@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+import yaml
 
 class BaseConverter(ABC):
     
@@ -49,4 +50,12 @@ class BaseConverter(ABC):
         """
         Create YAML config for converted dataset.
         """
-        pass
+        yaml_content = {
+            "path": str(self.output_dir.absolute()),
+            "train": "images/train",
+            "val": "images/val",
+            "names": {v: k for k, v in self.class_mapping.items()}
+        }
+        
+        with open(self.output_dir / "dataset.yaml", "w") as f:
+            yaml.dump(yaml_content, f, sort_keys=False)
