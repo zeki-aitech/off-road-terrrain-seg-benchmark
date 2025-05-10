@@ -12,17 +12,14 @@ class BaseConverter(ABC):
         self,
         source_dir: str,
         output_dir: str,
-        class_mapping=None
     ):
         """
         Args:
             source_dir (str): Directory containing the source data.
             output_dir (str): Directory to save the converted data.
-            class_mapping (dict, optional): Mapping of class names to IDs. Defaults to None.
         """
         self.source_dir = Path(source_dir)
         self.output_dir = Path(output_dir)
-        self.class_mapping = class_mapping if class_mapping else {}
 
         # Create output directories
         self.images_dir = self.output_dir / "images"
@@ -38,24 +35,10 @@ class BaseConverter(ABC):
         Convert dataset to YOLO format
         """
         pass
-    
-    def copy_images(self, source_images_dir, target_split="train"):
-        """
-        Copy images to the output directory.
-        """
-        pass
         
-    
+    @abstractmethod
     def create_yaml(self):
         """
         Create YAML config for converted dataset.
         """
-        yaml_content = {
-            "path": str(self.output_dir.absolute()),
-            "train": "images/train",
-            "val": "images/val",
-            "names": {v: k for k, v in self.class_mapping.items()}
-        }
-        
-        with open(self.output_dir / "dataset.yaml", "w") as f:
-            yaml.dump(yaml_content, f, sort_keys=False)
+        pass

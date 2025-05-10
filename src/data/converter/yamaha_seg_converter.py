@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import shutil
 from tqdm import tqdm
+import yaml
 from ultralytics.utils import LOGGER
 
 from .base_converter import BaseConverter
@@ -40,18 +41,18 @@ class YamahaSegConverter(BaseConverter):
         self,
         source_dir: str,
         output_dir: str,
-        class_mapping=YAMAHA_SEG_RGB_MAP
+        classes: dict = YAMAHA_SEG_CLASSES,
     ):
         """
         Args:
             source_dir (str): Directory containing the source data.
             output_dir (str): Directory to save the converted data.
-            class_mapping (dict, optional): Mapping of class names to IDs. Defaults to None.
+            classes (dict): Mapping of class indices to class names.
         """
-        super().__init__(source_dir, output_dir, class_mapping)
+        super().__init__(source_dir, output_dir)
         
-        # self.pixel_to_class_mapping = \
-        #     {i + 1: i for i in range(len(self.class_mapping))}
+        self.class_rgb_mapping = YAMAHA_SEG_RGB_MAP
+        self.classes = classes
     
     def convert(self):
         """
@@ -128,6 +129,20 @@ class YamahaSegConverter(BaseConverter):
         self.create_yaml()   
         
         # LOGGER.info((f"Conversion complete. Output saved to {self.output_dir}"))
+
+    def create_yaml(self):
+        """
+        Create YAML config for converted dataset.
+        """
+        yaml_content = {
+            "path": str(self.output_dir.absolute()),
+            "train": "images/train",
+            "val": "images/val",
+            "names": self.classes
+        }
+        
+        with open(self.output_dir / "dataset.yaml", "w") as f:
+            yaml.dump(yaml_content, f, sort_keys=False)
     
     def _convert_mask_to_yolo(self, mask_path):
         """
@@ -150,7 +165,7 @@ class YamahaSegConverter(BaseConverter):
             if np.array_equal(value, np.array([255, 255, 255])):  # Background color
                 continue  # Skip background
                 
-            class_index = self.class_mapping.get(tuple(value), -1)
+            class_index = self.class_rgb_mapping.get(tuple(value), -1)
             if class_index == -1:
                 LOGGER.warning(f"Unknown class for pixel value {value} in file {mask_path}, skipping.")
                 continue
