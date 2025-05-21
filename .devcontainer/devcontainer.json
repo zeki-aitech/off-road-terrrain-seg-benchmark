@@ -7,7 +7,8 @@
         "--gpus", "all",
         "--shm-size=16g",
         "-e", "PYTHONUNBUFFERED=1",
-        "-e", "DISPLAY=:0"
+        "-e", "DISPLAY=:0",
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"
     ],
     "postCreateCommand": "bash -c 'apt-get update && apt-get install -y git libgl1 libglib2.0-0 && pip install -r requirements.txt'",
     "customizations": {
