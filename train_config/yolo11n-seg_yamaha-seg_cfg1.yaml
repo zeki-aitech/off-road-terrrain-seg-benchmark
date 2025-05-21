@@ -1,5 +1,6 @@
 # --- Model Configuration ---
-model_name: 'yolo11n-seg-pt' 
+model_name: 'yolo11n-seg' 
+weights: 'yolo11n.pt'  # Path to the pre-trained weights file
 
 # --- Dataset Configuration ---
 data: datasets/converted/yamaha_seg/dataset.yaml  # Path to the dataset YAML file

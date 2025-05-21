@@ -43,6 +43,12 @@ def get_args():
         help="Name of the model to train.",
     )
     parser.add_argument(
+        "--weights",
+        type=str,
+        default=None,
+        help="Path to the model weights file (e.g., .pt file).",
+    )
+    parser.add_argument(
         "--data",
         type=str,
         help="Path to the data configuration file (e.g., data.yaml for Ultralytics).",
@@ -89,6 +95,7 @@ def main():
     # --- 1. Initialize training parameters ---
     train_kwargs = {}
     model_name = None
+    model_weights = None
     
     # --- 2. Load from --config-file (Lowest precedence after defaults) ---
     config_file_path_to_save = None
@@ -107,6 +114,8 @@ def main():
                 if config_params: # Ensure it's not None or empty
                     if 'model_name' in config_params:
                         model_name = config_params.pop('model_name')
+                    if 'weights' in config_params:
+                        model_weights = config_params.pop('weights')
                     train_kwargs.update(config_params)
                 LOGGER.info(f"Loaded training parameters from config file: {args.config_file}")
         except FileNotFoundError:
@@ -130,6 +139,7 @@ def main():
 
     # Overridable arguments
     if args.model_name is not None: model_name = args.model_name
+    if args.weights is not None: model_weights = args.weights
     if args.data is not None: train_kwargs['data'] = args.data
     if args.epochs is not None: train_kwargs['epochs'] = args.epochs
     if args.batch_size is not None: train_kwargs['batch'] = args.batch_size # Ultralytics uses 'batch'
@@ -162,7 +172,7 @@ def main():
     # --- Model Loading ---
     try:
         LOGGER.info(f"Loading model: {model_name}...")
-        model = get_model(model_name)
+        model = get_model(model_name, weights=model_weights)
         LOGGER.info(f"Model '{model_name}' loaded successfully.")
     except ValueError as e:
         LOGGER.error(f"Error loading model: {e}")
