@@ -1,2 +1,2 @@
 from .base_converter import BaseConverter
-from .yamaha_seg_converter import YamahaSegConverter
+from .yamaha_seg_converter import YamahaSegConverter, YAMAHA_SEG_CLASSES

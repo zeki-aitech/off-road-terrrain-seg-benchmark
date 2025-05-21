@@ -42,17 +42,29 @@ class YamahaSegConverter(BaseConverter):
         source_dir: str,
         output_dir: str,
         classes: dict = YAMAHA_SEG_CLASSES,
+        min_contour_pixel_area: int = 300,
     ):
         """
         Args:
             source_dir (str): Directory containing the source data.
             output_dir (str): Directory to save the converted data.
             classes (dict): Mapping of class indices to class names.
+            min_contour_pixel_area (int): Minimum area (in pixels) for a contour to be considered.
         """
         super().__init__(source_dir, output_dir)
         
         self.class_rgb_mapping = YAMAHA_SEG_RGB_MAP
+        if classes is None:
+            raise ValueError("Classes mapping cannot be None.")
         self.classes = classes
+        self.min_contour_pixel_area = min_contour_pixel_area
+        
+        # print input arguments
+        LOGGER.info(f"YamahaSegConverter initialized with parameters:")
+        LOGGER.info(f"  source_dir: {self.source_dir}")
+        LOGGER.info(f"  output_dir: {self.output_dir}")
+        LOGGER.info(f"  classes: {self.classes}")
+        LOGGER.info(f"  min_contour_pixel_area: {self.min_contour_pixel_area}")
     
     def convert(self):
         """
@@ -176,6 +188,12 @@ class YamahaSegConverter(BaseConverter):
             )  # Find contours
 
             for contour in contours:
+                # Filter by contour area
+                area = cv2.contourArea(contour)
+                if area < self.min_contour_pixel_area:
+                    LOGGER.debug(f"Contour in {mask_path.name} for class {class_index} rejected due to small area: {area:.2f} < {self.min_contour_pixel_area}")
+                    continue # Skip small contours
+                
                 if len(contour) >= 3:  # YOLO requires at least 3 points for a valid segmentation
                     contour = contour.squeeze()  # Remove single-dimensional entries
                     yolo_format = [class_index]
@@ -186,9 +204,4 @@ class YamahaSegConverter(BaseConverter):
                     yolo_format_data.append(yolo_format)
         
         return yolo_format_data
-        
-        
-
-# if __name__ == "__main__":
-    # test the converter
         
