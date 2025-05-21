@@ -1,6 +1,6 @@
 # Off-Road Terrain Segmentation Benchmark
 
-## Tools
+## Scripts
 ### 1. Convert Dataset
 The original datasets used in this study (e.g., KITTI, Yamaha-CMU Off-Road) often come in various proprietary or specific formats. To be used with the models in this study, these datasets first need to be converted into a standardized annotation format.
 
@@ -40,6 +40,126 @@ Ensure the paths for `--source-dir` and `--output-dir` are correct for your loca
 
 
 ### 2. Browse Dataset
+The `scripts/browse_dataset.py` script allows you to visually inspect images and their corresponding segmentation labels from a dataset configured with a `dataset.yaml` or `data.yaml` file (YOLO format). It displays images with overlaid segmentation polygons and class names.
 
+**Usage:**
 
-## Metrics
+Run the script from your project's root directory:
+```
+python3 scripts/browse_dataset.py --dataset_root_dir <path_to_dataset_root> [--split <split_name>]
+```
+
+**Arguments:**
+
+*   **`--dataset_root_dir <path_to_dataset_root>`** (Required):
+    *   Path to the root directory of your dataset. This directory must contain a `dataset.yaml` or `data.yaml` file that defines the dataset structure (paths to images/labels, class names, and splits like 'train', 'val', 'test').
+*   **`--split <split_name>`** (Optional):
+    *   Specify which dataset split to browse (e.g., `train`, `val`, `test`).
+    *   If not provided, it defaults to 'train' if available, then 'val'. If neither is found or multiple splits exist without a clear default, the script will prompt you to choose from the available splits defined in the YAML file.
+
+**How it Works:**
+
+1.  The script parses the `dataset.yaml` (or `data.yaml`) file found in the `--dataset_root_dir` to get the paths for image and label directories for the specified (or chosen) split, as well as class names .
+2.  It then loads images from the image directory and their corresponding `.txt` label files (expected to have the same base name and be in a parallel 'labels' directory, as per YOLO convention) from the label directory for that split .
+3.  Each image is displayed in an OpenCV window with its segmentation masks (polygons) and class labels overlaid. If class names are defined in the YAML, they are displayed; otherwise, class IDs are shown .
+
+**Interactive Controls:**
+
+Once an image is displayed, you can use the following commands in the **terminal** where you ran the script:
+
+*   **`n`**: Show the next image.
+*   **`p`**: Show the previous image.
+*   **`<number>`**: Go to the image at the specified number (1-indexed).
+*   **`q`**: Quit the browser.
+
+You can also quit by pressing **`q`** when the **OpenCV image window** is active .
+
+**Example:**
+
+To browse the 'validation' split of a dataset located at `datasets/my_offroad_data`:
+
+```
+python3 scripts/browse_dataset.py --dataset_root_dir datasets/my_offroad_data --split val
+```
+
+### 3. Train
+This script trains Ultralytics segmentation or detection models. It supports configuration via YAML/JSON files, command-line arguments, and offers TensorBoard/MLflow logging. Assumes your script is `scripts/train_model.py`.
+
+**Usage**
+
+Run from the command line:
+
+```
+python3 scripts/train_model.py [OPTIONS]
+```
+
+**Key Command-Line Arguments**
+
+*   **`--config-file <path>`**: Path to YAML/JSON config file.
+*   **`--tensorboard`**: Enable TensorBoard logging.
+*   **`--mlflow`**: Enable MLflow logging (sets `MLFLOW_EXPERIMENT_NAME` & `MLFLOW_RUN`).
+*   **`--model-name <name>`**: Model to train (e.g., `yolov8l-seg-pt`). Required if not in config.
+*   **`--data <path>`**: Path to data configuration file (e.g., `data.yaml`).
+*   **`--epochs <number>`**: Override training epochs.
+*   **`--batch-size <number>`**: Override batch size (`-1` for auto-batch).
+*   **`--imgsz <size>`**: Override input image size.
+*   **`--learning-rate <float>`**: Override initial learning rate (lr0).
+*   **`--project <name>`**: Project directory for saving results.
+*   **`--name <name>`**: Experiment name (subdirectory within project).
+*   **`--device <specifier>`**: Device to train on (e.g., 'cpu', '0').
+*   **`--workers <number>`**: Number of data loading workers.
+*   **`--extra-params '<json_string>'`**: Additional JSON parameters (e.g., `'{"patience": 50}'`). See Ultralytics train settings (<https://docs.ultralytics.com/modes/train/#train-settings>).
+
+**Configuration Precedence**
+
+1.  Direct CLI Arguments (e.g., `--epochs`)
+2.  `--extra-params` JSON String
+3.  `--config-file`
+4.  Ultralytics Defaults
+
+**Examples**
+
+*   **Using a config file:**
+    ```
+    python3 scripts/train_model.py --config-file configs/my_config.yaml
+    ```
+    *Example `my_config.yaml`*:
+    ```
+    model_name: yolov8s-seg.pt
+    data: coco128-seg.yaml
+    epochs: 50
+    batch_size: 16
+    imgsz: 640
+    project: 'my_project'
+    name: 'experiment1'
+    ```
+
+*   **CLI overrides:**
+    ```
+    python3 scripts/train_model.py --config-file configs/my_config.yaml --epochs 100 --name 'longer_run'
+    ```
+
+*   **Using only CLI arguments:**
+    ```
+    python3 scripts/train_model.py --model-name yolov8l-seg-pt --data data.yaml --epochs 75 --project 'new_proj' --name 'run1'
+    ```
+
+*   **With `--extra-params` and logging:**
+    ```
+    python3 scripts/train_model.py \
+        --config-file configs/base.yaml \
+        --extra-params '{"patience": 20, "optimizer": "AdamW"}' \
+        --tensorboard --mlflow
+    ```
+
+**Output & Logging**
+
+*   Console logs provide training details.
+*   TensorBoard/MLflow logs are generated if enabled.
+*   Results are saved in `project/name`.
+*   The used config file (if any) is copied to the results directory.
+
+**Model Loading**
+
+The script uses `get_model(model_name)` from `src.models.model_registry` to load the initial Ultralytics model.
+
