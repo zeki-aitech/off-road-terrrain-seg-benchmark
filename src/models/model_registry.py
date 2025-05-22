@@ -23,6 +23,12 @@ def get_model(model_name, weights=None):
         model = YOLO("yolov8l-seg.yaml").load(weights) if weights else YOLO("yolov8l-seg.yaml")
     elif model_name == "yolo11n-seg":
         model = YOLO("yolo11n-seg.yaml").load(weights) if weights else YOLO("yolo11n-seg.yaml")
+    elif model_name == "yolo11m-seg":
+        model = YOLO("yolo11m-seg.yaml").load(weights) if weights else YOLO("yolo11m-seg.yaml")
+    elif model_name == "yolo11l-seg":
+        model = YOLO("yolo11l-seg.yaml").load(weights) if weights else YOLO("yolo11l-seg.yaml")
+    elif model_name == "yolo11x-seg":
+        model = YOLO("yolo11x-seg.yaml").load(weights) if weights else YOLO("yolo11x-seg.yaml")
     else:
         raise ValueError(f"Unknown model name: {model_name}")
 
