@@ -1,12 +1,8 @@
 
-from .converter import YamahaSegConverter, YAMAHA_SEG_CLASSES
+from .converter import YamahaSegConverter
 
 DATASET_CONVERTERS = {
     "yamaha_seg": YamahaSegConverter,
-}
-
-CLASS_MAPPINGS = {
-    "yamaha_seg": YAMAHA_SEG_CLASSES,
 }
 
 def get_converter(dataset_name, source_dir, output_dir, **kwargs):
@@ -24,6 +20,5 @@ def get_converter(dataset_name, source_dir, output_dir, **kwargs):
     return converter_class(
         source_dir=source_dir, 
         output_dir=output_dir,
-        classes=CLASS_MAPPINGS.get(dataset_name, None),
         **kwargs
     )

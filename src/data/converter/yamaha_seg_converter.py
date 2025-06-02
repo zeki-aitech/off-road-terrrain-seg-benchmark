@@ -7,29 +7,13 @@ import yaml
 from ultralytics.utils import LOGGER
 
 from .base_converter import BaseConverter
+from .yamaha_seg_classes_cfg import (
+    YAMAHA_SEG_CLASSES_FULL,
+    YAMAHA_SEG_CLASSES_V1,
+)
 
 
-YAMAHA_SEG_RGB_MAP = {
-    (1, 88, 255): 0,    # blue - sky
-    (156, 76, 30): 1,   # brown - rough trail
-    (178, 176, 153): 2, # grey - smooth trail
-    (255, 0, 128): 3,   # pink - slippery trail
-    (128, 255, 0): 4,   # bright lime green - traversable grass
-    (40, 80, 0): 5,     # dark green - high vegetation
-    (0, 160, 0): 6,     # bright green - non-traversable low vegetation
-    (255, 0, 0): 7,     # red - obstacle
-}
 
-YAMAHA_SEG_CLASSES = {
-    0: "sky",
-    1: "rough_trail",
-    2: "smooth_trail",
-    3: "slippery_trail",
-    4: "traversable_grass",
-    5: "high_vegetation",
-    6: "non_traversable_low_vegetation",
-    7: "obstacle",
-}
 
 class YamahaSegConverter(BaseConverter):
     
@@ -41,7 +25,7 @@ class YamahaSegConverter(BaseConverter):
         self,
         source_dir: str,
         output_dir: str,
-        classes: dict = YAMAHA_SEG_CLASSES,
+        classes_cfg: str = 'YAMAHA_SEG_CLASSES_FULL',
         min_contour_pixel_area: int = 300,
     ):
         """
@@ -49,14 +33,25 @@ class YamahaSegConverter(BaseConverter):
             source_dir (str): Directory containing the source data.
             output_dir (str): Directory to save the converted data.
             classes (dict): Mapping of class indices to class names.
+            class_rgb_mapping (dict): Mapping of RGB values to class indices.
             min_contour_pixel_area (int): Minimum area (in pixels) for a contour to be considered.
         """
         super().__init__(source_dir, output_dir)
         
-        self.class_rgb_mapping = YAMAHA_SEG_RGB_MAP
-        if classes is None:
+        if classes_cfg is None:
             raise ValueError("Classes mapping cannot be None.")
-        self.classes = classes
+        
+        if isinstance(classes_cfg, str):
+            # Load classes configuration from the specified module
+            if classes_cfg == 'YAMAHA_SEG_CLASSES_FULL':
+                classes_cfg = YAMAHA_SEG_CLASSES_FULL
+            elif classes_cfg == 'YAMAHA_SEG_CLASSES_V1':
+                classes_cfg = YAMAHA_SEG_CLASSES_V1
+            else:
+                raise ValueError(f"Unknown classes configuration: {classes_cfg}")
+            
+        self.classes = classes_cfg["CLASSES"]
+        self.class_rgb_mapping = classes_cfg["RGB_MAP"]
         self.min_contour_pixel_area = min_contour_pixel_area
         
         # print input arguments

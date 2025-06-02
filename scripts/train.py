@@ -60,7 +60,7 @@ def get_args():
         '--batch-size', type=int, help='Override batch size for training. Use -1 for auto-batch.',
     )
     parser.add_argument(
-        '--imgsz', type=int, help='Override input image size for training.',
+        '--imgsz', type=int or list, help='Override input image size for training.',
     )
     parser.add_argument(
         '--learning-rate', type=float, help='Override initial learning rate (lr0).'
