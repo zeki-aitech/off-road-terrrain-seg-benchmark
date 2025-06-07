@@ -1,0 +1,123 @@
+study_name: 'yolo11n-seg-tune'  # Name of the Optuna study
+
+# --- Model Configuration --- #
+model_name: 'yolo11n-seg' 
+weights: 'yolo11n.pt'  # Path to the pre-trained weights file
+
+project: 'optuna_tunes'  # Project name for saving results
+name: 'yolo11n-seg-tune'  # Name of the experiment
+
+# --- Dataset Configuration --- #
+data: datasets/converted/yamaha_seg/dataset.yaml  # Path to the dataset YAML file
+
+# --- Other Configuration --- #
+epochs: 100 # Total number of training epochs
+time: None
+patience: 50 # Early stopping patience
+
+save: True # Save model checkpoints
+save_period: -1 # Save model every epoch
+cache: False # Cache images for faster training
+device: None # Device to use for training, e.g., 'cuda:0' or 'cpu'
+workers: 8 # Number of data loading workers
+exist_ok: False # Allow overwriting existing results
+pretrained: True # Use pre-trained weights
+
+optimizer: 'AdamW'
+seed: 0 # Random seed for reproducibility
+deterministic: True
+single_cls: False # Single class training
+rect: True
+multi_scale: False
+cos_lr: False
+close_mosaic: 10
+resume: False # Resume training from a checkpoint
+amp: True # Use Automatic Mixed Precision
+fraction: 1.0 # Fraction of the dataset to use for training
+profile: False
+freeze: None # Freeze layers during training, e.g., 'backbone', 'head'
+
+box: 7.5              # Box loss gain
+nbs: 64               # Nominal batch size for scaling hyperparameters (non-tunable)
+overlap_mask: True    # Use overlap mask for segmentation
+mask_ratio: 4         # Ratio of mask to image size
+dropout: 0.0          # Dropout rate
+val: True             # Validate during training
+plots: True           # Save training plots
+
+# --- Tunable Hyperparameters Settings --- #
+# Default hyperparameters for the model
+
+imgsz: [640, 640] # Input image size for training
+batch: 16 # Batch size for training
+
+lr0: 0.01             # Initial learning rate
+lrf: 0.01             # Final learning rate multiplier
+momentum: 0.937       # SGD momentum
+weight_decay: 0.0005  # L2 regularization
+batch_size: 16        # Batch size
+warmup_epochs: 3.0    # Warmup epochs duration
+warmup_momentum: 0.8  # Initial momentum during warmup
+warmup_bias_lr: 0.1   # Initial bias learning rate during warmup
+cls: 0.5              # Classification loss gain
+dfl: 1.5              # DFL loss gain
+
+hsv_h: 0.015          # Hue augmentation (fraction)
+hsv_s: 0.7            # Saturation augmentation (fraction)
+hsv_v: 0.4            # Value augmentation (fraction)
+degrees: 0.0          # Rotation augmentation (degrees)
+translate: 0.1        # Translation augmentation (fraction)
+scale: 0.5            # Scale augmentation (log scale)
+shear: 0.0            # Shear augmentation (degrees)
+perspective: 0.0      # Perspective augmentation (fraction)
+flipud: 0.0           # Vertical flip probability
+fliplr: 0.5           # Horizontal flip probability
+bgr: 0.0              # BGR augmentation probability
+mosaic: 1.0           # Mosaic augmentation probability
+mixup: 0.0            # Mixup augmentation probability
+cut_mix: 0.0           # CutMix augmentation probability
+copy_paste: 0.0       # Copy-paste augmentation probability
+copy_paste_mode: 'flip'
+auto_augment: 'randaugment'
+erasing: 0.4          # Erasing augmentation probability
+
+# --- tuning ---
+tune:
+  # Hyperparameters to tune, can override the default values if specified
+  # Format: [suggestion_type, [args]]
+  # -- float tune args: [min, max, step, log]
+  # -- int tune args: [min, max, step, log]
+  # -- categorical tune args: [list of options] 
+
+  # Train parameters
+  imgsz: [categorical, [[640, 640], [1024, 544]]]   # Input image size for training
+  batch: [int, [8, 16, 8, True]]                    # Batch size 
+  lr0: [float, [1e-5, 1e-1, None]]            # Log scale
+  lrf: [float, [0.01, 0.1, None]]             # Linear scale
+  momentum: [float, [0.8, 0.98, None]]        # Momentum for SGD optimizer
+  weight_decay: [float, [0.0, 0.001, None]]   # L2 regularization
+  warmup_epochs: [float, [0.0, 5.0, None]]    # Warmup epochs duration
+  warmup_momentum: [float, [0.6, 0.95, None]] # Initial momentum during warmup
+  warmup_bias_lr: [float, [0.0, 0.2, None]]   # Initial bias learning rate during warmup
+  cls: [float, [0.2, 2.0, None]]              # Classification loss gain
+  dfl: [float, [1.0, 2.0, None]]              # DFL loss gain 
+
+  # Augmentation parameters
+  hsv_h: [float, [0.0, 0.1, None]]           # Hue augmentation fraction
+  hsv_s: [float, [0.0, 0.9, None]]           # Saturation augmentation fraction
+  hsv_v: [float, [0.0, 0.9, None]]           # Value augmentation fraction
+  degrees: [float, [0.0, 20.0, None]]        # Rotation augmentation degrees
+  translate: [float, [0.0, 0.5, None]]       # Translation augmentation fraction
+  scale: [float, [0.0, 0.9, None]]           # Scale augmentation (log scale)
+  shear: [float, [0.0, 10.0, None]]          # Shear augmentation degrees
+  perspective: [float, [0.0, 0.001, None]]   # Perspective augmentation fraction
+  flipud: [float, [0.0, 0.5, None]]          # Vertical flip probability
+  fliplr: [float, [0.0, 1.0, None]]          # Horizontal flip probability
+  bgr: [float, [0.0, 0.0, None]]             # BGR augmentation probability (usually off)
+  mosaic: [float, [0.8, 1.0, None]]          # Mosaic augmentation probability (keep high)
+  mixup: [float, [0.0, 0.5, None]]           # Mixup augmentation probability
+  cut_mix: [float, [0.0, 0.3, None]]         # CutMix augmentation probability
+  copy_paste: [float, [0.0, 0.5, None]]      # Copy-paste augmentation probability
+  copy_paste_mode: [categorical, ['flip', 'mixup', None]] # Categorical: flip or mixup
+  auto_augment: [categorical, [None, 'randaugment', 'autoaugment', 'augmix']] # Categorical
+  erasing: [float, [0.0, 0.2, None]]         # Erasing augmentation probability 

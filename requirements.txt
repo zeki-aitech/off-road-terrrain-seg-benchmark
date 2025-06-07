@@ -3,4 +3,5 @@ ultralytics
 tensorboard
 mlflow
 optuna
+optuna-dashboard
 
