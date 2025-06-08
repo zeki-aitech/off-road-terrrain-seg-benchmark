@@ -151,7 +151,7 @@ def main():
     LOGGER.info("-" * 30)
     
     # Create output directory with absolute path
-    output_dir = PROJECT_ROOT / "runs" / "optuna_tunes" / "results"
+    output_dir = PROJECT_ROOT / opt_config['project'] / "results"
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Use absolute path for SQLite storage
@@ -161,7 +161,7 @@ def main():
         direction='maximize',
         storage=db_path,
         study_name=study_name,
-        load_if_exists=False 
+        load_if_exists=True 
     )
 
     study.optimize(

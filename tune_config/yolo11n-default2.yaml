@@ -2,10 +2,10 @@ study_name: 'yolo11n-seg-tune'  # Name of the Optuna study
 
 # --- Model Configuration --- #
 model_name: 'yolo11n-seg' 
-weights: 'yolo11n.pt'  # Path to the pre-trained weights file
+weights: 'yolo11n-seg.pt'  # Path to the pre-trained weights file
 
-project: 'runs/optuna_tunes'  # Project name for saving results
-n_trials: 5  # Number of trials for hyperparameter tuning 
+project: 'runs/optuna_tunes2'  # Project name for saving results
+n_trials: 50  # Number of trials for hyperparameter tuning
 name: 'yolo11n-seg-tune'  # Name of the experiment
 
 # --- Dataset Configuration --- #
