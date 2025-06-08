@@ -4,21 +4,21 @@ study_name: 'yolo11n-seg-tune'  # Name of the Optuna study
 model_name: 'yolo11n-seg' 
 weights: 'yolo11n.pt'  # Path to the pre-trained weights file
 
-project: 'optuna_tunes'  # Project name for saving results
+project: 'runs/optuna_tunes'  # Project name for saving results
 name: 'yolo11n-seg-tune'  # Name of the experiment
 
 # --- Dataset Configuration --- #
-data: datasets/converted/yamaha_seg/dataset.yaml  # Path to the dataset YAML file
+data: datasets/converted/yamaha_seg1/dataset.yaml  # Path to the dataset YAML file
 
 # --- Other Configuration --- #
 epochs: 100 # Total number of training epochs
-time: None
+time: null
 patience: 50 # Early stopping patience
 
 save: True # Save model checkpoints
 save_period: -1 # Save model every epoch
 cache: False # Cache images for faster training
-device: None # Device to use for training, e.g., 'cuda:0' or 'cpu'
+device: null # Device to use for training, e.g., 'cuda:0' or 'cpu'
 workers: 8 # Number of data loading workers
 exist_ok: False # Allow overwriting existing results
 pretrained: True # Use pre-trained weights
@@ -35,7 +35,7 @@ resume: False # Resume training from a checkpoint
 amp: True # Use Automatic Mixed Precision
 fraction: 1.0 # Fraction of the dataset to use for training
 profile: False
-freeze: None # Freeze layers during training, e.g., 'backbone', 'head'
+freeze: null # Freeze layers during training, e.g., 'backbone', 'head'
 
 box: 7.5              # Box loss gain
 nbs: 64               # Nominal batch size for scaling hyperparameters (non-tunable)
@@ -55,7 +55,7 @@ lr0: 0.01             # Initial learning rate
 lrf: 0.01             # Final learning rate multiplier
 momentum: 0.937       # SGD momentum
 weight_decay: 0.0005  # L2 regularization
-batch_size: 16        # Batch size
+batch: 16        # Batch size
 warmup_epochs: 3.0    # Warmup epochs duration
 warmup_momentum: 0.8  # Initial momentum during warmup
 warmup_bias_lr: 0.1   # Initial bias learning rate during warmup
@@ -75,7 +75,7 @@ fliplr: 0.5           # Horizontal flip probability
 bgr: 0.0              # BGR augmentation probability
 mosaic: 1.0           # Mosaic augmentation probability
 mixup: 0.0            # Mixup augmentation probability
-cut_mix: 0.0           # CutMix augmentation probability
+cutmix: 0.0           # CutMix augmentation probability
 copy_paste: 0.0       # Copy-paste augmentation probability
 copy_paste_mode: 'flip'
 auto_augment: 'randaugment'
@@ -116,7 +116,7 @@ tune:
   bgr: [float, [0.0, 0.0, null]]
   mosaic: [float, [0.8, 1.0, null]]
   mixup: [float, [0.0, 0.5, null]]
-  cut_mix: [float, [0.0, 0.3, null]]
+  cutmix: [float, [0.0, 0.3, null]]
   copy_paste: [float, [0.0, 0.5, null]]
   copy_paste_mode: [categorical, ['flip', 'mixup', null]]
   auto_augment: [categorical, [null, 'randaugment', 'autoaugment', 'augmix']]
