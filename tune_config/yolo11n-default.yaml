@@ -90,34 +90,34 @@ tune:
   # -- categorical tune args: [list of options] 
 
   # Train parameters
-  imgsz: [categorical, [[640, 640], [1024, 544]]]   # Input image size for training
-  batch: [int, [8, 16, 8, True]]                    # Batch size 
-  lr0: [float, [1e-5, 1e-1, None]]            # Log scale
-  lrf: [float, [0.01, 0.1, None]]             # Linear scale
-  momentum: [float, [0.8, 0.98, None]]        # Momentum for SGD optimizer
-  weight_decay: [float, [0.0, 0.001, None]]   # L2 regularization
-  warmup_epochs: [float, [0.0, 5.0, None]]    # Warmup epochs duration
-  warmup_momentum: [float, [0.6, 0.95, None]] # Initial momentum during warmup
-  warmup_bias_lr: [float, [0.0, 0.2, None]]   # Initial bias learning rate during warmup
-  cls: [float, [0.2, 2.0, None]]              # Classification loss gain
-  dfl: [float, [1.0, 2.0, None]]              # DFL loss gain 
+  imgsz: [categorical, [[640, 640], [1024, 544]]]
+  batch: [int, [8, 16, 8, false]]  # Use lowercase false for boolean
+  lr0: [float, [1e-5, 1e-1, null, true]]  # null instead of None
+  lrf: [float, [0.01, 0.1, null]]
+  momentum: [float, [0.8, 0.98, null]]
+  weight_decay: [float, [0.0, 0.001, null]]
+  warmup_epochs: [float, [0.0, 5.0, null]]
+  warmup_momentum: [float, [0.6, 0.95, null]]
+  warmup_bias_lr: [float, [0.0, 0.2, null]]
+  cls: [float, [0.2, 2.0, null]]
+  dfl: [float, [1.0, 2.0, null]]
 
   # Augmentation parameters
-  hsv_h: [float, [0.0, 0.1, None]]           # Hue augmentation fraction
-  hsv_s: [float, [0.0, 0.9, None]]           # Saturation augmentation fraction
-  hsv_v: [float, [0.0, 0.9, None]]           # Value augmentation fraction
-  degrees: [float, [0.0, 20.0, None]]        # Rotation augmentation degrees
-  translate: [float, [0.0, 0.5, None]]       # Translation augmentation fraction
-  scale: [float, [0.0, 0.9, None]]           # Scale augmentation (log scale)
-  shear: [float, [0.0, 10.0, None]]          # Shear augmentation degrees
-  perspective: [float, [0.0, 0.001, None]]   # Perspective augmentation fraction
-  flipud: [float, [0.0, 0.5, None]]          # Vertical flip probability
-  fliplr: [float, [0.0, 1.0, None]]          # Horizontal flip probability
-  bgr: [float, [0.0, 0.0, None]]             # BGR augmentation probability (usually off)
-  mosaic: [float, [0.8, 1.0, None]]          # Mosaic augmentation probability (keep high)
-  mixup: [float, [0.0, 0.5, None]]           # Mixup augmentation probability
-  cut_mix: [float, [0.0, 0.3, None]]         # CutMix augmentation probability
-  copy_paste: [float, [0.0, 0.5, None]]      # Copy-paste augmentation probability
-  copy_paste_mode: [categorical, ['flip', 'mixup', None]] # Categorical: flip or mixup
-  auto_augment: [categorical, [None, 'randaugment', 'autoaugment', 'augmix']] # Categorical
-  erasing: [float, [0.0, 0.2, None]]         # Erasing augmentation probability 
+  hsv_h: [float, [0.0, 0.1, null]]
+  hsv_s: [float, [0.0, 0.9, null]]
+  hsv_v: [float, [0.0, 0.9, null]]
+  degrees: [float, [0.0, 20.0, null]]
+  translate: [float, [0.0, 0.5, null]]
+  scale: [float, [0.0, 0.9, null]]
+  shear: [float, [0.0, 10.0, null]]
+  perspective: [float, [0.0, 0.001, null]]
+  flipud: [float, [0.0, 0.5, null]]
+  fliplr: [float, [0.0, 1.0, null]]
+  bgr: [float, [0.0, 0.0, null]]
+  mosaic: [float, [0.8, 1.0, null]]
+  mixup: [float, [0.0, 0.5, null]]
+  cut_mix: [float, [0.0, 0.3, null]]
+  copy_paste: [float, [0.0, 0.5, null]]
+  copy_paste_mode: [categorical, ['flip', 'mixup', null]]
+  auto_augment: [categorical, [null, 'randaugment', 'autoaugment', 'augmix']]
+  erasing: [float, [0.0, 0.2, null]]

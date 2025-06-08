@@ -95,27 +95,48 @@ def seg_objective(
     tune_params = {}
     for param, value in tune_config.items():
         suggest_type = value[0]
-        suggest_args = value[1]
+        suggest_args = value[1].copy()  # Avoid modifying the original list
+
+        # Handle 'log' for float/int
+        log_flag = False
+        # If the last argument is a boolean (True/False), treat it as log
+        if suggest_type in ('float', 'int') and len(suggest_args) > 3 and isinstance(suggest_args[3], bool):
+            log_flag = suggest_args[3]
+            suggest_args = suggest_args[:3]
+
         if suggest_type == 'float':
+            # Optuna: log and step cannot both be set
+            step = suggest_args[2] if len(suggest_args) > 2 else None
+            if log_flag and step is not None:
+                step = None  # Remove step if log is True
             tune_params[param] = trial.suggest_float(
                 name=param,
-                low=suggest_args[0],
-                high=suggest_args[1],
-                step=suggest_args[2] if len(suggest_args) > 2 else None,
-                log=suggest_args[3] if len(suggest_args) > 3 else False,
+                low=float(suggest_args[0]),
+                high=float(suggest_args[1]),
+                step=step,
+                log=log_flag,
             )
         elif suggest_type == 'int':
+            step = suggest_args[2] if len(suggest_args) > 2 else 1
+            # Optuna: log and step cannot both be set for int
+            if log_flag and step != 1:
+                log_flag = False  # Ignore log if step is provided
             tune_params[param] = trial.suggest_int(
                 name=param,
-                low=suggest_args[0],
-                high=suggest_args[1],
-                step=suggest_args[2] if len(suggest_args) > 2 else None,
-                log=suggest_args[3] if len(suggest_args) > 3 else False,
+                low=int(suggest_args[0]),
+                high=int(suggest_args[1]),
+                step=step,
+                log=log_flag,
             )
         elif suggest_type == 'categorical':
+            # Convert YAML lists to tuples for hashability, if needed
+            choices = [
+                tuple(x) if isinstance(x, list) else x
+                for x in suggest_args
+            ]
             tune_params[param] = trial.suggest_categorical(
                 name=param,
-                choices=suggest_args,
+                choices=choices,
             )
             
     LOGGER.info(f"Suggested hyperparameters: {tune_params}")
