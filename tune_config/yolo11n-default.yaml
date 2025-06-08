@@ -48,7 +48,7 @@ plots: True           # Save training plots
 # --- Tunable Hyperparameters Settings --- #
 # Default hyperparameters for the model
 
-imgsz: [640, 640] # Input image size for training
+imgsz: [1024, 544] # Input image size for training
 batch: 16 # Batch size for training
 
 lr0: 0.01             # Initial learning rate
@@ -90,7 +90,7 @@ tune:
   # -- categorical tune args: [list of options] 
 
   # Train parameters
-  imgsz: [categorical, [[640, 640], [1024, 544]]]
+  # imgsz: [categorical, [[640, 640], [1024, 544]]]
   batch: [int, [8, 16, 8, false]]  # Use lowercase false for boolean
   lr0: [float, [1e-5, 1e-1, null, true]]  # null instead of None
   lrf: [float, [0.01, 0.1, null]]
@@ -118,6 +118,6 @@ tune:
   mixup: [float, [0.0, 0.5, null]]
   cutmix: [float, [0.0, 0.3, null]]
   copy_paste: [float, [0.0, 0.5, null]]
-  copy_paste_mode: [categorical, ['flip', 'mixup', null]]
-  auto_augment: [categorical, [null, 'randaugment', 'autoaugment', 'augmix']]
+  copy_paste_mode: [categorical, ['flip', 'mixup']]
+  auto_augment: [categorical, ['randaugment', 'autoaugment', 'augmix']]
   erasing: [float, [0.0, 0.2, null]]

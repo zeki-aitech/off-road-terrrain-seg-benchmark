@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 from copy import deepcopy
@@ -33,21 +34,26 @@ def parse_args():
 
 def seg_objective(trial, model, config):
     full_params = deepcopy(config)
-    # 1. Suggest hyperparameters using Optuna
     tune_params = {}
     for param, value in full_params.get('tune', {}).items():
         suggest_type = value[0]
         suggest_args = value[1].copy()
-        # Convert YAML null/"None" to Python None
-        suggest_args = [
-            None if (isinstance(arg, str) and arg.lower() in ["none", "null"]) else arg
-            for arg in suggest_args
-        ]
+
+        # Convert YAML lists to tuples for categorical parameters (deep conversion)
+        if suggest_type == "categorical":
+            # Ensure all nested lists are converted to tuples
+            def convert_to_tuple(item):
+                if isinstance(item, list):
+                    return tuple(convert_to_tuple(x) for x in item)
+                return item
+            suggest_args = [convert_to_tuple(x) for x in suggest_args]
+
         # Handle 'log' for float/int
         log_flag = False
         if suggest_type in ('float', 'int') and len(suggest_args) > 3 and isinstance(suggest_args[3], bool):
             log_flag = suggest_args[3]
             suggest_args = suggest_args[:3]
+
         if suggest_type == 'float':
             step = suggest_args[2] if len(suggest_args) > 2 else None
             if log_flag and step is not None:
@@ -70,12 +76,14 @@ def seg_objective(trial, model, config):
                 step=step,
                 log=log_flag,
             )
-        elif suggest_type == 'categorical':
-            # Convert YAML lists to tuples for hashability, if needed
-            choices = [tuple(x) if isinstance(x, list) else x for x in suggest_args]
+        elif suggest_type == "categorical":
+            # Deep conversion: convert any list (even nested) to tuple
+            def to_tuple(x):
+                return tuple(to_tuple(i) for i in x) if isinstance(x, list) else x
+            suggest_args = [to_tuple(x) for x in suggest_args]
             tune_params[param] = trial.suggest_categorical(
                 name=param,
-                choices=choices,
+                choices=suggest_args,
             )
     full_params.update(tune_params)
     full_params.pop('tune', None)
@@ -141,10 +149,19 @@ def main():
     for key, value in sorted(opt_config.items()):
         LOGGER.info(f"  {key}: {value}")
     LOGGER.info("-" * 30)
-
+    
+    # Create output directory with absolute path
+    output_dir = PROJECT_ROOT / "runs" / "optuna_tunes" / "results"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Use absolute path for SQLite storage
+    db_path = f"sqlite:///{output_dir}/db.sqlite3"
+    
     study = optuna.create_study(
         direction='maximize',
-        study_name=study_name
+        storage=db_path,
+        study_name=study_name,
+        load_if_exists=False 
     )
 
     study.optimize(
