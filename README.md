@@ -163,3 +163,56 @@ python3 scripts/train_model.py [OPTIONS]
 
 The script uses `get_model(model_name)` from `src.models.model_registry` to load the initial Ultralytics model.
 
+### 4. Predict
+
+updating...
+
+### 5. Export
+
+updating...
+
+### 6. Tune Hyperparameters with Optuna
+
+updating...
+
+### 7. Export Best Hyperparameters from Optuna Tuning Results
+
+This script allows you to easily extract the best hyperparameter set found by Optuna from a SQLite database and export it to a YAML file. It is designed for workflows where Optuna is used for hyperparameter optimization and experiment tracking.
+
+#### Features
+
+- **Exports best hyperparameters** from an Optuna study to a YAML file.
+- **Optionally updates an existing YAML config**: If you provide an input config, only parameters listed in the `tune` section will be updated or added at the root level.
+- **Writes the best objective value** as a comment at the top of the YAML file.
+
+---
+
+#### How to Use
+
+**1. Export all best parameters to a new YAML file:**
+
+```
+python export_optuna_best --storage runs/optuna_tunes/results/db.sqlite3 --output best_params.yaml
+```
+
+- This creates `best_params.yaml` containing all best hyperparameters and the best value as a comment.
+
+**2. Update an existing config file with best tuned parameters:**
+
+python export_optuna_best --input config.yaml --storage runs/optuna_tunes/results/db.sqlite3 --output best_config.yaml
+
+- This updates only the parameters listed in the `tune` section of `config.yaml` with the best values from Optuna, preserving the rest of your config and its comments.
+
+---
+
+#### Arguments
+
+- `--storage` (required): Path to the Optuna SQLite database file.
+- `--input` (optional): Path to your existing YAML config file. If omitted, all best parameters are exported.
+- `--output` (optional): Output YAML file name. Defaults to `best_params.yaml`.
+
+---
+
+
+**Tip:**  
+This script is ideal for integrating Optuna’s tuning results directly into your model training or deployment pipelines, ensuring reproducibility and easy experiment management.
