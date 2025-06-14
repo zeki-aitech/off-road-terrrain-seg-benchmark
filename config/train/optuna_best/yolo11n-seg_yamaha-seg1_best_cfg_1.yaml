@@ -1,0 +1,81 @@
+# best_value: 0.3560657773486633
+
+# --- Model Configuration --- #
+model_name: 'yolo11n-seg'
+weights: 'yolo11n-seg.pt'  # Path to the pre-trained weights file
+
+project: 'runs/yolo11n-seg'  # Project name for saving results
+name: 'yamaha-seg1_cfg1_best_exp'  # Name of the experiment
+
+# --- Dataset Configuration --- #
+data: datasets/converted/yamaha_seg1/dataset.yaml  # Path to the dataset YAML file
+
+# --- Other Configuration --- #
+epochs: 200 # Total number of training epochs
+time:
+patience: 50 # Early stopping patience
+
+save: true # Save model checkpoints
+save_period: -1 # Save model every epoch
+cache: false # Cache images for faster training
+device:      # Device to use for training, e.g., 'cuda:0' or 'cpu'
+workers: 8 # Number of data loading workers
+exist_ok: false # Allow overwriting existing results
+pretrained: true # Use pre-trained weights
+
+optimizer: 'AdamW'
+seed: 0 # Random seed for reproducibility
+deterministic: true
+single_cls: false # Single class training
+rect: true
+multi_scale: false
+cos_lr: false
+close_mosaic: 10
+resume: true # Resume training from a checkpoint
+amp: true # Use Automatic Mixed Precision
+fraction: 1.0 # Fraction of the dataset to use for training
+profile: false
+freeze:      # Freeze layers during training, e.g., 'backbone', 'head'
+
+box: 7.5              # Box loss gain
+nbs: 64               # Nominal batch size for scaling hyperparameters (non-tunable)
+overlap_mask: true    # Use overlap mask for segmentation
+mask_ratio: 4         # Ratio of mask to image size
+dropout: 0.0          # Dropout rate
+val: true             # Validate during training
+plots: true           # Save training plots
+
+# --- Tunable Hyperparameters Settings --- #
+# Default hyperparameters for the model
+
+imgsz: [1024, 544] # Input image size for training
+batch: 8  # Batch size for training
+
+lr0: 0.0005053214120820779 # Initial learning rate
+lrf: 0.035539571248463596 # Final learning rate multiplier
+momentum: 0.9501855156777752 # SGD momentum
+weight_decay: 0.00019885328994466103 # L2 regularization
+warmup_epochs: 3.9710907795430215 # Warmup epochs duration
+warmup_momentum: 0.6917984460964934 # Initial momentum during warmup
+warmup_bias_lr: 0.03708935105687028 # Initial bias learning rate during warmup
+cls: 1.3203725258014227 # Classification loss gain
+dfl: 1.996162441330159 # DFL loss gain
+
+hsv_h: 0.0011435267697257941 # Hue augmentation (fraction)
+hsv_s: 0.7752810762384241 # Saturation augmentation (fraction)
+hsv_v: 0.8473422180906922 # Value augmentation (fraction)
+degrees: 0.7776190514923165 # Rotation augmentation (degrees)
+translate: 0.4962808379126654 # Translation augmentation (fraction)
+scale: 0.7553378050080998 # Scale augmentation (log scale)
+shear: 5.004375001478397 # Shear augmentation (degrees)
+perspective: 0.0005999497274305232 # Perspective augmentation (fraction)
+flipud: 0.4420120720703212 # Vertical flip probability
+fliplr: 0.4711103896860048 # Horizontal flip probability
+bgr: 0.0              # BGR augmentation probability
+mosaic: 0.9332015136241426 # Mosaic augmentation probability
+mixup: 0.17042973018132274 # Mixup augmentation probability
+cutmix: 0.03260288965470973 # CutMix augmentation probability
+copy_paste: 0.0017762802378245488 # Copy-paste augmentation probability
+copy_paste_mode: 'flip'
+auto_augment: 'augmix'
+erasing: 0.1782358904272101 # Erasing augmentation probability

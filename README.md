@@ -46,12 +46,12 @@ The `scripts/browse_dataset.py` script allows you to visually inspect images and
 
 Run the script from your project's root directory:
 ```
-python3 scripts/browse_dataset.py --dataset_root_dir <path_to_dataset_root> [--split <split_name>]
+python3 scripts/browse_dataset.py --dataset <path_to_dataset_root> [--split <split_name>]
 ```
 
 **Arguments:**
 
-*   **`--dataset_root_dir <path_to_dataset_root>`** (Required):
+*   **`--dataset <path_to_dataset_root>`** (Required):
     *   Path to the root directory of your dataset. This directory must contain a `dataset.yaml` or `data.yaml` file that defines the dataset structure (paths to images/labels, class names, and splits like 'train', 'val', 'test').
 *   **`--split <split_name>`** (Optional):
     *   Specify which dataset split to browse (e.g., `train`, `val`, `test`).
@@ -59,7 +59,7 @@ python3 scripts/browse_dataset.py --dataset_root_dir <path_to_dataset_root> [--s
 
 **How it Works:**
 
-1.  The script parses the `dataset.yaml` (or `data.yaml`) file found in the `--dataset_root_dir` to get the paths for image and label directories for the specified (or chosen) split, as well as class names .
+1.  The script parses the `dataset.yaml` (or `data.yaml`) file found in the `--dataset` to get the paths for image and label directories for the specified (or chosen) split, as well as class names .
 2.  It then loads images from the image directory and their corresponding `.txt` label files (expected to have the same base name and be in a parallel 'labels' directory, as per YOLO convention) from the label directory for that split .
 3.  Each image is displayed in an OpenCV window with its segmentation masks (polygons) and class labels overlaid. If class names are defined in the YAML, they are displayed; otherwise, class IDs are shown .
 

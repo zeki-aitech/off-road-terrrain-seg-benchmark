@@ -56,7 +56,6 @@ lr0: 0.01             # Initial learning rate
 lrf: 0.01             # Final learning rate multiplier
 momentum: 0.937       # SGD momentum
 weight_decay: 0.0005  # L2 regularization
-batch: 16        # Batch size
 warmup_epochs: 3.0    # Warmup epochs duration
 warmup_momentum: 0.8  # Initial momentum during warmup
 warmup_bias_lr: 0.1   # Initial bias learning rate during warmup

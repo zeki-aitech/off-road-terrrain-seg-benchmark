@@ -1,0 +1,40 @@
+# 
+
+# Model and source
+model_name: yolo11n-seg
+weights: /workspaces/off-road-terrrain-seg-benchmark/runs/yolo11n-seg/yamaha-seg1_cfg1_best_exp8/weights/best.pt
+source: /workspaces/off-road-terrrain-seg-benchmark/assets/example1.mp4
+
+# Inference arguments
+conf: 0.25
+iou: 0.5
+imgsz: 640
+rect: true
+half: false
+device: ''
+batch: 1
+max_det: 300
+vid_stride: 1
+stream_buffer: false
+visualize: false
+augment: false
+agnostic_nms: false
+classes: null        # Example: [0, 1] to filter classes, or leave empty/null for all
+retina_masks: false
+embed: null        # Example: [1, 2], or leave empty/null
+project: runs/predict
+name: exp
+stream: true
+verbose: true
+
+# Visualization arguments
+show: true
+save: false
+save_frames: false
+save_txt: false
+save_conf: false
+save_crop: false
+show_labels: true
+show_conf: true
+show_boxes: false
+line_width: null    # null means auto

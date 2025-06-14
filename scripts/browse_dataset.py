@@ -399,7 +399,7 @@ if __name__ == "__main__":
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
-        "--dataset_root_dir",
+        "--dataset",
         type=dir_path,
         required=True,
         help="Path to the root directory of the dataset. \n"
@@ -419,17 +419,17 @@ if __name__ == "__main__":
     yaml_path = None
     possible_yaml_names = ["dataset.yaml", "data.yaml"]
     for name in possible_yaml_names:
-        path = os.path.join(args.dataset_root_dir, name)
+        path = os.path.join(args.dataset, name)
         if os.path.isfile(path):
             yaml_path = path
             break
     
     if not yaml_path:
-        print(f"Error: Could not find 'dataset.yaml' or 'data.yaml' in '{args.dataset_root_dir}'.")
+        print(f"Error: Could not find 'dataset.yaml' or 'data.yaml' in '{args.dataset}'.")
         exit(1)
     
     print(f"Using dataset configuration file: {yaml_path}")
-    dataset_config = parse_dataset_yaml(yaml_path, args.dataset_root_dir)
+    dataset_config = parse_dataset_yaml(yaml_path, args.dataset)
 
     if not dataset_config or not dataset_config.get('splits'):
         print("Error: Failed to load or parse dataset configuration, or no valid splits found.")

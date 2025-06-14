@@ -156,6 +156,8 @@ def main():
     # For this example, we rely on Ultralytics defaults if not set.
 
     LOGGER.info(f"Final training parameters after merging all sources:")
+    LOGGER.info(f" Model Name: {model_name}")
+    LOGGER.info(f" Model Weights: {model_weights if model_weights else 'Default weights will be used.'}")
     for key, value in sorted(train_kwargs.items()): # Sorted for consistent logging
         LOGGER.info(f"  {key}: {value}")
     LOGGER.info("-" * 30)
