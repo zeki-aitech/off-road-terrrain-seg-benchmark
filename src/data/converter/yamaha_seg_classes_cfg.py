@@ -46,3 +46,30 @@ YAMAHA_SEG_CLASSES_V1 = {
 }
 
 
+YAMAHA_SEG_CLASSES_V1 = {
+    "RGB_MAP" : {
+        (1, 88, 255): 0,    # blue - sky
+        (156, 76, 30): 1,   # brown - rough trail
+        (178, 176, 153): 2, # grey - smooth trail
+        (128, 255, 0): 3,   # bright lime green - traversable grass
+        (40, 80, 0): 4,     # dark green - high vegetation
+        (0, 160, 0): 5,     # bright green - non-traversable low vegetation
+        (255, 0, 0): 6,     # red - obstacle
+    },
+    "CLASSES" : {
+        0: "sky",
+        1: "rough_trail",
+        2: "smooth_trail",
+        3: "traversable_grass",
+        4: "high_vegetation",
+        5: "non_traversable_low_vegetation",
+        6: "obstacle",
+    }
+}
+
+YAMAHA_SEG_CLASSES_UNIFIED_4 = {
+    
+}
+
+
+

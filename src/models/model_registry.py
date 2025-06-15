@@ -1,5 +1,5 @@
 import ultralytics
-from ultralytics import YOLO, FastSAM
+from ultralytics import YOLO
 
 from src.nn.tasks import (
     parse_model,
@@ -7,7 +7,6 @@ from src.nn.tasks import (
 
 MODEL_NAMES = [
     "yolo8l-seg-pt",
-    "fatsam-s-pt",
 ]
 
 def apply_custom_patches():
