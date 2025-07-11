@@ -5,6 +5,7 @@
 /runs/
 *.pt
 
+/datasets/
 /datasets/converted/
 /datasets/origin/
 
