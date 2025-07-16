@@ -7,9 +7,13 @@ from ultralytics.engine.model import Model
 from ultralytics.nn.tasks import SegmentationModel
 
 from src.models.deeplabv3plus import (
-    DeepLabV3PlusTrainer,
+    DeepLabV3PlusSemanticSegmentationTrainer,
     DeepLabV3PlusPredictor,
     DeepLabV3PlusValidator,
+)
+
+from src.nn.tasks import (
+    DeepLabV3PlusSemanticSegmentationModel
 )
 
 class DeepLabV3Plus(Model):
@@ -28,8 +32,8 @@ class DeepLabV3Plus(Model):
     def task_map(self) -> Dict[str, Dict[str, Any]]:
         return {
             "segment": {
-                "model": SegmentationModel,
-                "trainer": DeepLabV3PlusTrainer,
+                "model": DeepLabV3PlusSemanticSegmentationModel,
+                "trainer": DeepLabV3PlusSemanticSegmentationTrainer,
                 "validator": DeepLabV3PlusValidator,
                 "predictor": DeepLabV3PlusPredictor,
             },

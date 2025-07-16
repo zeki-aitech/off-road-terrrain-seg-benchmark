@@ -4,7 +4,7 @@ from torch import nn
 __all__ = "DeepLabV3PlusDecoder"
 
 
-class DeepLabV3PlusDecoder(nn.Module):
+class DeepLabV3PlusSemanticSegment(nn.Module):
     
     def __init__(self):
         pass

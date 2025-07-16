@@ -4,6 +4,7 @@ import contextlib
 import torch
 import torch.nn as nn
 
+from ultralytics.models import yolo
 from ultralytics.utils import (
     LOGGER, colorstr
 )
@@ -12,6 +13,9 @@ from ultralytics.utils.ops import make_divisible
 from ultralytics.nn.modules import (
     Conv,
 )
+
+from src.nn.modules import (
+    
 
 def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
     """
@@ -111,4 +115,26 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
 
 
 
+class DeepLabV3PlusSemanticSegmentationModel(yolo.model.SegmentationModel):
+    """
+    DeepLabV3+ model for semantic segmentation.
+    This class extends the YOLO SegmentationModel to implement the DeepLabV3+ architecture for semantic segmentation tasks.
+    
+    """
+    
+    def __init__(self, cfg="deeplabv3plus_resnet50.yaml", ch=3, nc=None, verbose=True):
+        """
+        Initializes the DeepLabV3Plus model.
+
+        Args:
+            cfg (str | dict): Model configuration file path or dictionary.
+            ch (int): Number of input channels.
+            nc (int, optional): Number of classes.
+            verbose (bool): Whether to display model information.
+        """
+        super().__init__(cfg=cfg, ch=ch, nc=nc, verbose=verbose)
+    
+    def init_criterion(self):
+        """Initialize the loss criterion for the model."""
+        pass
     

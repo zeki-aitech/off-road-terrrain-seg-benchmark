@@ -28,13 +28,13 @@ stream: true
 verbose: true
 
 # Visualization arguments
-show: true
-save: false
+show: false
+save: true
 save_frames: false
 save_txt: false
 save_conf: false
 save_crop: false
 show_labels: true
 show_conf: true
-show_boxes: false
+show_boxes: true
 line_width: null    # null means auto
