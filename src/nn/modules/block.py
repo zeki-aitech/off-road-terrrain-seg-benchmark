@@ -47,6 +47,58 @@ class DeepLabV3PlusResNet50Backbone(nn.Module):
         return high_level_features, low_level_features
     
     
+class ResNet50Stem(nn.Module):
+    """
+    Outputs the stem features of ResNet50 (conv1, bn1, relu, maxpool).
+    """
+    def __init__(self, c1, c2, weights=ResNet50_Weights.IMAGENET1K_V2):
+        super().__init__()
+        resnet50 = tvmodels.resnet50(weights=weights)
+        self.stem = nn.Sequential(
+            resnet50.conv1,
+            resnet50.bn1,
+            resnet50.relu,
+            resnet50.maxpool
+        )
+    def forward(self, x):
+        return self.stem(x)
+    
+
+class ResNet50Layer(nn.Module):
+    """
+    Outputs the features of a specified ResNet50 layer (layer1, layer2, layer3, layer4).
+    Args:
+        layer_id (int): Which layer to use (1, 2, 3, or 4)
+    """
+    def __init__(self, c1, c2, layer_id=1, 
+        replace_stride_with_dilation = False,
+        weights=ResNet50_Weights.IMAGENET1K_V2):
+        super().__init__()
+        
+        self.layer_id = layer_id
+        
+        if layer_id not in [1, 2, 3, 4]:
+            raise ValueError("layer_id must be 1, 2, 3, or 4")
+        elif layer_id == 1:
+            replace_stride_with_dilation = [False, False, False]
+        elif layer_id == 2:
+            replace_stride_with_dilation = [replace_stride_with_dilation, False, False]
+        elif layer_id == 3:
+            replace_stride_with_dilation = [False, replace_stride_with_dilation, False]
+        elif layer_id == 4:
+            replace_stride_with_dilation = [False, False, replace_stride_with_dilation]
+            
+        resnet50 = tvmodels.resnet50(
+            weights=weights,
+            replace_stride_with_dilation= replace_stride_with_dilation
+        )
+        
+        self.layer = getattr(resnet50, f'layer{layer_id}')
+
+    def forward(self, x):
+        return self.layer(x)
+    
+    
 class ASPPPooling(nn.Module):
     """
     ASPP Pooling Layer for Atrous Spatial Pyramid Pooling.
@@ -118,10 +170,9 @@ class ASPP(nn.Module):
         x = self.projector(x)
         return x
 
-        
-        
-        
-        
-    
-    
-    
+
+
+
+
+
+

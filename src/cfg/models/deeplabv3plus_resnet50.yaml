@@ -1,21 +1,31 @@
 
 # Parameters
 nc: 80  # number of classes
+scales:
+  # [depth, width, max_channels]
+  l: [1.00, 1.00, 2048]
+
 
 
 backbone:
-  - [-1, 1, DeepLabV3PlusResNet50Backbone, []]  # returns (high_level, low_level)
+  - [-1, 1, ResNet50Stem, [64]]  # Stem: input channels 3, output 64
+
 
 head:
+  - [-1, 1, ResNet50Layer, [256, 1]]  # Layer1: input 64, output 256, layer_id=1
+  - [-1, 1, ResNet50Layer, [512, 2, False]]  # Layer2: input 256, output 512, layer_id=2
+  - [-1, 1, ResNet50Layer, [1024, 3, True]]  # Layer3: input 512, output 1024, layer_id=3
+  - [-1, 1, ResNet50Layer, [2048, 4, False]]  # Layer4: input 1024, output 2048, layer_id=4
+
   # ASPP on high-level features
   - [-1, 1, ASPP, [256]]                     # ASPP on high-level features (2048 -> 256)
   - [-1, 1, nn.Upsample, [None, 4, "bilinear"]]  # Upsample ASPP output by 4x
 
   # 1x1 Conv on low-level features (256 -> 48)
-  - [0, 1, Conv, [48, 1, 1]]
+  - [1, 1, Conv, [48, 1, 1]]
 
   # Concatenate upsampled ASPP and projected low-level features (256 + 48 = 304)
-  - [[-2, -1], 1, Concat, [1]]
+  - [[-1, 6], 1, Concat, [1]]
 
   # Two 3x3 convolutions for refinement (304 -> 256 -> 256)
   - [-1, 1, Conv, [256, 3, 1]]
