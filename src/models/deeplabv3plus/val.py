@@ -11,6 +11,18 @@ class DeepLabV3PlusSemanticSegmentationValidator(yolo.segment.SegmentationValida
     def __init__(self, dataloader=None, save_dir=None, args=None, _callbacks=None) -> None:
         """
         """
-        super().__init__(
-            self.test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks
+        super().__init__(dataloader, save_dir, args, _callbacks)
+        
+        
+    def get_desc(self) -> str:
+        """Return a formatted description of evaluation metrics."""
+        return ("%22s" + "%11s" * 10) % (
+            "Class",
+            "Images",
+            "mIoU",
         )
+        
+    def init_metrics(self, model):
+        return super().init_metrics(model)
+        
+    

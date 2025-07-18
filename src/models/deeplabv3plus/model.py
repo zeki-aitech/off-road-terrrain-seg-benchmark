@@ -9,7 +9,7 @@ from ultralytics.nn.tasks import SegmentationModel
 from src.models.deeplabv3plus import (
     DeepLabV3PlusSemanticSegmentationTrainer,
     DeepLabV3PlusPredictor,
-    DeepLabV3PlusValidator,
+    DeepLabV3PlusSemanticSegmentationValidator
 )
 
 from src.nn.tasks import (
@@ -34,7 +34,7 @@ class DeepLabV3Plus(Model):
             "segment": {
                 "model": DeepLabV3PlusSemanticSegmentationModel,
                 "trainer": DeepLabV3PlusSemanticSegmentationTrainer,
-                "validator": DeepLabV3PlusValidator,
+                "validator": DeepLabV3PlusSemanticSegmentationValidator,
                 "predictor": DeepLabV3PlusPredictor,
             },
         }
