@@ -20,6 +20,8 @@ class DeepLabV3PlusSemanticSegmentationValidator(yolo.segment.SegmentationValida
             "Class",
             "Images",
             "mIoU",
+            "Pixel Accuracy",
+            "Mean Class Accuracy"
         )
         
     def init_metrics(self, model):

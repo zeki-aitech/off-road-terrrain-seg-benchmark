@@ -24,6 +24,8 @@ from src.nn.modules import (
     SeparableConv,
     DeepLabV3PlusSemanticSegment,
 )
+
+from src.utils.loss import DeepLabV3PlusSemanticSegmentationLoss
     
 
 def parse_model(d, ch, verbose=True):
@@ -142,5 +144,5 @@ class DeepLabV3PlusSemanticSegmentationModel(yolo.model.SegmentationModel):
     
     def init_criterion(self):
         """Initialize the loss criterion for the model."""
-        pass
+        return DeepLabV3PlusSemanticSegmentationLoss(self)
     

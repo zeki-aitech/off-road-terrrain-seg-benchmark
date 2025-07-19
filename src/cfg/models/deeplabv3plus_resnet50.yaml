@@ -19,22 +19,22 @@ head:
 
   # ASPP on high-level features
   - [-1, 1, ASPP, [256]]                     # ASPP on high-level features (2048 -> 256)
-  # - [-1, 1, nn.Upsample, [None, 4, "bilinear"]]  # Upsample ASPP output by 4x
+  - [-1, 1, nn.Upsample, [None, 4, "bilinear"]]  # Upsample ASPP output by 4x
 
-  # # 1x1 Conv on low-level features (256 -> 48)
-  # - [1, 1, Conv, [48, 1, 1]]
+  # 1x1 Conv on low-level features (256 -> 48)
+  - [1, 1, Conv, [48, 1, 1]]
 
-  # # Concatenate upsampled ASPP and projected low-level features (256 + 48 = 304)
-  # - [[-1, 6], 1, Concat, [1]]
+  # Concatenate upsampled ASPP and projected low-level features (256 + 48 = 304)
+  - [[-1, 6], 1, Concat, [1]]
 
-  # # Two 3x3 convolutions for refinement (304 -> 256 -> 256)
-  # - [-1, 1, Conv, [256, 3, 1]]
-  # - [-1, 1, Conv, [256, 3, 1]]
+  # Two 3x3 convolutions for refinement (304 -> 256 -> 256)
+  - [-1, 1, Conv, [256, 3, 1]]
+  - [-1, 1, Conv, [256, 3, 1]]
 
-  # # Upsample to original image size
-  # - [-1, 1, nn.Upsample, [None, 4, "bilinear"]]
+  # Upsample to original image size
+  - [-1, 1, nn.Upsample, [None, 4, "bilinear"]]
 
-  # # Final 1x1 Conv to get class scores
-  # - [-1, 1, DeepLabV3PlusSemanticSegment, [nc]]
+  # Final 1x1 Conv to get class scores
+  - [-1, 1, DeepLabV3PlusSemanticSegment, [nc]]
 
   
