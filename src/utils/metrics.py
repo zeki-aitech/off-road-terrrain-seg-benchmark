@@ -17,13 +17,14 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
         task (str): The task type, set to 'semantic_segment'.
     """
     
-    def __init__(self) -> None:
+    def __init__(self, ignore_index: int = 255):
         """Initializes the SemanticSegmentMetrics instance."""
         self.miou = 0.0
         self.pixel_acc = 0.0
         self.mean_class_acc = 0.0
         self.speed = {"preprocess": 0.0, "inference": 0.0, "loss": 0.0, "postprocess": 0.0}
         self.task = "semantic_segment"
+        self.ignore_index = ignore_index  # Index to ignore in metrics calculations
         
     def process(self, targets: torch.Tensor, pred: torch.Tensor):
         """
@@ -47,17 +48,18 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
 
     def calculate_pixel_accuracy(self, pred, targets):
         """Calculate pixel accuracy."""
-        correct = (pred == targets).sum()
-        total = targets.numel()
-        return (correct / total).item()
+        mask = (targets != self.ignore_index)
+        correct = ((pred == targets) & mask).sum()
+        total = mask.sum()
+        return (correct.float() / total.float()).item()
 
-    def calculate_mean_class_accuracy(self, pred, targets, ignore_index=255):
+    def calculate_mean_class_accuracy(self, pred, targets):
         """Calculate mean class accuracy."""
         classes = torch.unique(targets)
         class_accs = []
 
         for cls in classes:
-            if cls == ignore_index:
+            if cls == self.ignore_index:
                 continue  # Skip ignore index class
             mask = (targets == cls)
             if mask.sum() > 0:
@@ -67,7 +69,7 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
 
         return sum(class_accs) / len(class_accs) if class_accs else 0.0
         
-    def calculate_miou(self, pred: torch.Tensor, targets: torch.Tensor, num_classes: int = None, ignore_index: int = 255) -> float:
+    def calculate_miou(self, pred: torch.Tensor, targets: torch.Tensor, num_classes: int = None) -> float:
         """
         Calculate mean Intersection over Union (mIoU) for semantic segmentation.
 
@@ -75,7 +77,6 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
             pred (torch.Tensor): Predicted segmentation masks [N, H, W] or [H, W].
             targets (torch.Tensor): Ground truth segmentation masks [N, H, W] or [H, W].
             num_classes (int, optional): Number of classes. If None, inferred from data.
-            ignore_index (int): Index to ignore in calculation (default: 255).
 
         Returns:
             float: Mean IoU score.
@@ -85,7 +86,7 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
         targets = targets.flatten()
 
         # Remove ignore index pixels
-        valid_mask = targets != ignore_index
+        valid_mask = targets != self.ignore_index
         pred = pred[valid_mask]
         targets = targets[valid_mask]
 
