@@ -1,8 +1,9 @@
 from typing import Dict, Any, Tuple
 import torch
 import torch.nn.functional as F
+
 from ultralytics.utils import LOGGER, colorstr
-from src.utils import convert_instance_masks_to_semantic
+from src.utils.mask_processing import convert_instance_masks_to_semantic
 
 
 class DeepLabV3PlusSemanticSegmentationLoss:
@@ -83,8 +84,16 @@ class DeepLabV3PlusSemanticSegmentationLoss:
         
         # Check for NaN loss
         if torch.isnan(loss):
-            LOGGER.error(f"{colorstr('red', 'Error:')} Loss is NaN - check your data and model")
-            raise ValueError("Loss is NaN; check your data and model.")
+            # Check if all targets are ignore_index (empty batch case)
+            valid_pixels = (semantic_masks != 255).sum()
+            if valid_pixels == 0:
+                # If all pixels are ignored, return a zero loss
+                LOGGER.warning(f"{colorstr('yellow', 'Warning:')} All pixels ignored, returning zero loss")
+                loss = torch.tensor(0.0, device=preds.device, requires_grad=True)
+            else:
+                # Real NaN error - should raise exception
+                LOGGER.error(f"{colorstr('red', 'Error:')} Loss is NaN - check your data and model")
+                raise ValueError("Loss is NaN; check your data and model.")
             
         # Return loss and detached version for logging (following Ultralytics pattern)
         return loss, loss.detach()

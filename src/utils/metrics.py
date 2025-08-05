@@ -35,9 +35,60 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
             pred (torch.Tensor): Predicted segmentation masks [H, W] or [N, H, W].
         """
         if isinstance(pred, list):
-            pred = torch.cat(pred)
+            # Check if all tensors have the same spatial dimensions
+            if len(pred) > 1:
+                shapes = [p.shape[-2:] for p in pred]
+                if not all(shape == shapes[0] for shape in shapes):
+                    # Resize all to the same size (take the largest dimensions)
+                    max_h = max(shape[0] for shape in shapes)
+                    max_w = max(shape[1] for shape in shapes)
+                    
+                    resized_pred = []
+                    for p in pred:
+                        if p.shape[-2:] != (max_h, max_w):
+                            # Use interpolation for resizing
+                            import torch.nn.functional as F
+                            p_resized = F.interpolate(
+                                p.float().unsqueeze(0), 
+                                size=(max_h, max_w), 
+                                mode='nearest'
+                            ).squeeze(0).long()
+                            resized_pred.append(p_resized)
+                        else:
+                            resized_pred.append(p)
+                    pred = torch.cat(resized_pred)
+                else:
+                    pred = torch.cat(pred)
+            else:
+                pred = pred[0] if pred else torch.empty(0)
+                
         if isinstance(targets, list):
-            targets = torch.cat(targets)
+            # Apply the same resizing logic to targets
+            if len(targets) > 1:
+                shapes = [t.shape[-2:] for t in targets]
+                if not all(shape == shapes[0] for shape in shapes):
+                    # Resize all to the same size (take the largest dimensions)
+                    max_h = max(shape[0] for shape in shapes)
+                    max_w = max(shape[1] for shape in shapes)
+                    
+                    resized_targets = []
+                    for t in targets:
+                        if t.shape[-2:] != (max_h, max_w):
+                            # Use interpolation for resizing
+                            import torch.nn.functional as F
+                            t_resized = F.interpolate(
+                                t.float().unsqueeze(0), 
+                                size=(max_h, max_w), 
+                                mode='nearest'
+                            ).squeeze(0).long()
+                            resized_targets.append(t_resized)
+                        else:
+                            resized_targets.append(t)
+                    targets = torch.cat(resized_targets)
+                else:
+                    targets = torch.cat(targets)
+            else:
+                targets = targets[0] if targets else torch.empty(0)
 
         # Calculate mIoU
         self.miou = self.calculate_miou(pred, targets)

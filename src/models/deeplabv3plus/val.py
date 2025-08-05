@@ -10,7 +10,7 @@ from ultralytics.utils import LOGGER
 from ultralytics.utils.plotting import plot_images
 
 from src.utils.metrics import SemanticSegmentMetrics
-from src.utils import convert_instance_masks_to_semantic
+from src.utils.mask_processing import convert_instance_masks_to_semantic
 
 
 class DeepLabV3PlusSemanticSegmentationValidator(BaseValidator):
