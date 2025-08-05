@@ -6,15 +6,13 @@ from typing import Dict, Any
 from ultralytics.engine.model import Model
 from ultralytics.nn.tasks import SegmentationModel
 
-from src.models.deeplabv3plus import (
-    DeepLabV3PlusSemanticSegmentationTrainer,
-    DeepLabV3PlusPredictor,
-    DeepLabV3PlusSemanticSegmentationValidator
-)
-
 from src.nn.tasks import (
     DeepLabV3PlusSemanticSegmentationModel
 )
+
+from .train import DeepLabV3PlusSemanticSegmentationTrainer
+from .val import DeepLabV3PlusSemanticSegmentationValidator
+from .predict import DeepLabV3PlusPredictor
 
 class DeepLabV3Plus(Model):
     

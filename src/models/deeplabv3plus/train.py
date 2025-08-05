@@ -5,10 +5,16 @@ from copy import copy
 from ultralytics.models import yolo
 from ultralytics.utils import DEFAULT_CFG, RANK
 
-from src.models.deeplabv3plus import (
-    DeepLabV3PlusSemanticSegmentationModel,
-    DeepLabV3PlusSemanticSegmentationValidator,
+# from src.models.deeplabv3plus import (
+#     DeepLabV3PlusSemanticSegmentationModel,
+#     DeepLabV3PlusSemanticSegmentationValidator,
+# )
+
+from src.nn.tasks import (
+    DeepLabV3PlusSemanticSegmentationModel
 )
+
+from .val import DeepLabV3PlusSemanticSegmentationValidator
 
 
 class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer):
