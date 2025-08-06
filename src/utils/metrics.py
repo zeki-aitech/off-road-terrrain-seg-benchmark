@@ -195,6 +195,11 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
         """Return a list of curves for accessing specific metrics curves."""
         return []
     
+    def finalize(self):
+        """Finalize metrics computation (compatibility method)."""
+        # Nothing specific to finalize for semantic segmentation metrics
+        pass
+    
     def summary(self, normalize: bool = True, decimals: int = 5) -> List[Dict[str, float]]:
         """
         Generate a single-row summary of semantic segmentation metrics (mIoU).

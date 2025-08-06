@@ -90,62 +90,26 @@ class DeepLabV3PlusSemanticSegmentationPredictor(yolo.segment.SegmentationPredic
                     mode='nearest'
                 ).squeeze().long()
             
-            # Convert to numpy
-            semantic_mask = pred_classes.cpu().numpy().astype(np.uint8)
+            # Convert to numpy for final result, but keep tensor for Results object
+            semantic_mask_np = pred_classes.cpu().numpy().astype(np.uint8)
+            # Keep as tensor for Results object (expected format)
+            semantic_mask_tensor = pred_classes.unsqueeze(0)  # Add batch dim: [1, H, W]
             
             # Create Results object
-            # For semantic segmentation, we store the mask directly as a 2D array
+            # For semantic segmentation, we store the mask as tensor
+            # We need to provide empty tensors for boxes to avoid plotting errors
+            empty_boxes = torch.empty(0, 6)  # Empty boxes tensor [N, 6] format
+            
             result = Results(
                 orig_img=orig_img,
                 path=getattr(self, 'source', ''),
                 names=getattr(self.model, 'names', {}),
-                masks=semantic_mask,  # Store as 2D array [H, W]
-                boxes=None,  # No bounding boxes for semantic segmentation
+                masks=semantic_mask_tensor,  # Store as tensor [1, H, W]
+                boxes=empty_boxes,    # Empty boxes tensor instead of None
                 probs=None   # No classification probabilities
             )
             
             results.append(result)
             
         return results
-    
-    def write_results(self, idx: int, results: List[Results], batch: Dict[str, Any]) -> str:
-        """
-        Write semantic segmentation results to file.
-        
-        Args:
-            idx (int): Index of the image in the batch
-            results (List[Results]): Prediction results
-            batch (Dict[str, Any]): Batch information
-            
-        Returns:
-            str: Log string for this prediction
-        """
-        p, im, _ = batch
-        log_string = ""
-        
-        if len(results):
-            result = results[0]
-            if result.masks is not None:
-                # Get unique classes in the mask (excluding background)
-                mask = result.masks if isinstance(result.masks, np.ndarray) else result.masks[0]
-                unique_classes = np.unique(mask)
-                unique_classes = unique_classes[unique_classes > 0]  # Remove background
-                
-                log_string += f"{len(unique_classes)} classes detected: "
-                if hasattr(self.model, 'names'):
-                    class_names = [self.model.names.get(int(cls), f"class_{cls}") 
-                                 for cls in unique_classes]
-                    log_string += ", ".join(class_names)
-                else:
-                    log_string += ", ".join([f"class_{cls}" for cls in unique_classes])
-                    
-                # Save semantic mask if save is enabled
-                if self.args.save or self.args.save_txt:
-                    save_path = Path(self.save_dir) / f"{Path(p).stem}_semantic_mask.png"
-                    # Save mask as image (pixel values = class IDs)
-                    import cv2
-                    cv2.imwrite(str(save_path), mask)
-                    log_string += f" -> saved to {save_path}"
-        
-        return log_string
         
