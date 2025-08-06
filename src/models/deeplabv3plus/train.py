@@ -3,8 +3,8 @@
 from copy import copy
 
 # Apply monkey patches before importing Ultralytics
-from src.patches import apply_patches
-apply_patches()
+# from src.patches import apply_patches
+# apply_patches()
 
 from ultralytics.models import yolo
 from ultralytics.utils import DEFAULT_CFG, RANK

@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union, Optional
 
 import torch
 import torch.nn.functional as F
 
 from ultralytics.data import build_dataloader, build_yolo_dataset
 from ultralytics.engine.validator import BaseValidator
+from ultralytics.models import yolo
 from ultralytics.utils import LOGGER
 from ultralytics.utils.plotting import plot_images
 
@@ -159,35 +160,33 @@ class DeepLabV3PlusSemanticSegmentationValidator(BaseValidator):
         """Calculate and return a dictionary of metrics by processing targets and predictions."""
         return self.metrics.results_dict
 
-    def build_dataset(self, img_path: str):
-        """Create a segmentation dataset instance for validation."""
-        return build_yolo_dataset(
-            cfg=self.args,
-            img_path=img_path,
-            batch=self.args.batch,
-            data=getattr(self.args, 'data', {}),
-            mode='val',
-        )
-
-    def get_dataloader(self, dataset_path: Union[Path, str], batch_size: int) -> torch.utils.data.DataLoader:
+    def build_dataset(self, img_path: str, mode: str = "val", batch: Optional[int] = None) -> torch.utils.data.Dataset:
         """
-        Build and return a data loader for segmentation validation.
+        Build YOLO Dataset.
 
         Args:
-            dataset_path (str | Path): Path to the dataset directory.
-            batch_size (int): Number of samples per batch.
+            img_path (str): Path to the folder containing images.
+            mode (str): `train` mode or `val` mode, users are able to customize different augmentations for each mode.
+            batch (int, optional): Size of batches, this is for `rect`.
 
         Returns:
-            (torch.utils.data.DataLoader): DataLoader object for the segmentation validation dataset.
+            (Dataset): YOLO dataset.
         """
-        dataset = self.build_dataset(dataset_path)
-        return build_dataloader(
-            dataset=dataset,
-            batch=batch_size,
-            workers=getattr(self.args, 'workers', 8),
-            shuffle=False,
-            rank=-1
-        )
+        return build_yolo_dataset(self.args, img_path, batch, self.data, mode=mode, stride=self.stride)
+
+    def get_dataloader(self, dataset_path: str, batch_size: int) -> torch.utils.data.DataLoader:
+        """
+        Construct and return dataloader.
+
+        Args:
+            dataset_path (str): Path to the dataset.
+            batch_size (int): Size of each batch.
+
+        Returns:
+            (torch.utils.data.DataLoader): Dataloader for validation.
+        """
+        dataset = self.build_dataset(dataset_path, batch=batch_size, mode="val")
+        return build_dataloader(dataset, batch_size, self.args.workers, shuffle=False, rank=-1)  # return dataloader
 
     def print_results(self) -> None:
         """Print evaluation metrics for the segmentation model."""
@@ -212,7 +211,7 @@ class DeepLabV3PlusSemanticSegmentationValidator(BaseValidator):
         # Skip plotting for segmentation to avoid format conflicts with plot_images
         if not self.args.plots:
             return
-        LOGGER.info(f"Segmentation validation sample plotting skipped for batch {ni}")
+        # LOGGER.info(f"Segmentation validation sample plotting skipped for batch {ni}")
 
     def plot_predictions(self, batch: Dict[str, Any], preds: torch.Tensor, ni: int) -> None:
         """
@@ -232,4 +231,4 @@ class DeepLabV3PlusSemanticSegmentationValidator(BaseValidator):
         # Skip plotting for segmentation to avoid format conflicts with plot_images
         if not self.args.plots:
             return
-        LOGGER.info(f"Segmentation prediction plotting skipped for batch {ni}")
+        # LOGGER.info(f"Segmentation prediction plotting skipped for batch {ni}")

@@ -23,7 +23,7 @@ class SemanticSegmentMetrics(SimpleClass, DataExportMixin):
         self.pixel_acc = 0.0
         self.mean_class_acc = 0.0
         self.speed = {"preprocess": 0.0, "inference": 0.0, "loss": 0.0, "postprocess": 0.0}
-        self.task = "semantic_segment"
+        self.task = "segment"
         self.ignore_index = ignore_index  # Index to ignore in metrics calculations
         
     def process(self, targets: torch.Tensor, pred: torch.Tensor):
