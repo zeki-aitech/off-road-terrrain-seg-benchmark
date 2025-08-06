@@ -71,7 +71,7 @@ class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer)
             "Epoch",
             "GPU_mem",
             *self.loss_names,
-            "Instances",
+            "Classes",
             "Size",
         )
     

@@ -12,10 +12,10 @@ from src.nn.tasks import (
 
 from .train import DeepLabV3PlusSemanticSegmentationTrainer
 from .val import DeepLabV3PlusSemanticSegmentationValidator
-from .predict import DeepLabV3PlusPredictor
+from .predict import DeepLabV3PlusSemanticSegmentationPredictor
 
 class DeepLabV3Plus(Model):
-    
+
     def __init__(self, model="deeplabv3plus.yaml", task="segment", verbose=False):
         """
         Initializes the DeepLabV3Plus model.
@@ -33,6 +33,6 @@ class DeepLabV3Plus(Model):
                 "model": DeepLabV3PlusSemanticSegmentationModel,
                 "trainer": DeepLabV3PlusSemanticSegmentationTrainer,
                 "validator": DeepLabV3PlusSemanticSegmentationValidator,
-                "predictor": DeepLabV3PlusPredictor,
+                "predictor": DeepLabV3PlusSemanticSegmentationPredictor,
             },
         }

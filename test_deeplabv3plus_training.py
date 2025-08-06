@@ -90,6 +90,8 @@ def run_deeplabv3plus_training():
         print("\n🚀 Starting training...")
         print("   Note: This is a test run with minimal epochs")
         print("   For production, use 50-100 epochs with larger batch sizes")
+        print("   Metrics: mIoU, PixelAcc, MeanAcc (semantic segmentation metrics)")
+        print("   Not using mAP (object detection metric) - inappropriate for semantic segmentation")
         
         # Start training
         results = trainer.train()
@@ -99,10 +101,20 @@ def run_deeplabv3plus_training():
         
         if results:
             print("📈 Training Results:")
-            if hasattr(results, 'maps50'):
-                print(f"   mAP@0.5: {results.maps50:.4f}")
+            # Semantic segmentation metrics (not mAP which is for object detection)
+            if hasattr(results, 'miou'):
+                print(f"   mIoU: {results.miou:.4f}")
+            if hasattr(results, 'pixel_acc'):
+                print(f"   Pixel Accuracy: {results.pixel_acc:.4f}")
+            if hasattr(results, 'mean_acc'):
+                print(f"   Mean Accuracy: {results.mean_acc:.4f}")
             if hasattr(results, 'fitness'):
                 print(f"   Fitness: {results.fitness:.4f}")
+            
+            # If no specific semantic metrics, show what's available
+            if not any(hasattr(results, attr) for attr in ['miou', 'pixel_acc', 'mean_acc']):
+                print("   Note: Semantic segmentation metrics not directly accessible in results object")
+                print("   Check validation logs above for mIoU, PixelAcc, and MeanAcc values")
         
         print("\n🎉 DeepLabV3+ training pipeline is fully functional!")
         

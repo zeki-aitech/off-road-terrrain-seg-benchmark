@@ -3,7 +3,7 @@ from ultralytics.utils import DEFAULT_CFG
 
 
 
-class DeepLabV3PlusPredictor(yolo.segment.SegmentationPredictor):
+class DeepLabV3PlusSemanticSegmentationPredictor(yolo.segment.SegmentationPredictor):
     """
     Predictor for the DeepLabV3+ model.
     """
