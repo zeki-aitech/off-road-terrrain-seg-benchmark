@@ -1,6 +1,6 @@
 
 # Parameters
-nc: 80  # number of classes
+nc: 80  # number of classes (default, will be overridden by dataset YAML)
 scales:
   # [depth, width, max_channels]
   l: [1.00, 1.00, 2048]

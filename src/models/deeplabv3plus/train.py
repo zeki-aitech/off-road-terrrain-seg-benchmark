@@ -2,6 +2,10 @@
 
 from copy import copy
 
+# Apply monkey patches before importing Ultralytics
+from src.patches import apply_patches
+apply_patches()
+
 from ultralytics.models import yolo
 from ultralytics.utils import DEFAULT_CFG, RANK
 
@@ -33,6 +37,8 @@ class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer)
             overrides (dict, optional): Dictionary of parameter overrides for the default configuration.
             _callbacks (list, optional): List of callback functions to be executed during training.
         """
+        # Initialize loss_names before calling parent constructor
+        self.loss_names = ["loss"]
         super().__init__(cfg=cfg, overrides=overrides, _callbacks=_callbacks)
     
     def get_model(self, cfg=None, weights=None, verbose=True):
@@ -47,6 +53,10 @@ class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer)
         Returns:
             DeepLabV3PlusSemanticSegmentationModel: Initialized model ready for training.
         """
+        # Use default config if none provided
+        if cfg is None:
+            cfg = "/workspaces/off-road-terrrain-seg-benchmark/src/cfg/models/deeplabv3plus_resnet50.yaml"
+            
         model = DeepLabV3PlusSemanticSegmentationModel(
             cfg, nc=self.data["nc"], ch=self.data["channels"], verbose=verbose and RANK == -1
         )
@@ -67,10 +77,10 @@ class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer)
     
     def get_validator(self):
         """Return an instance of DeepLabV3PlusSemanticSegmentationValidator for validation."""
-        self.loss_names = ["loss"]
-        
+        # Use test_loader if available (during training), otherwise use None
+        test_loader = getattr(self, 'test_loader', None)
         return DeepLabV3PlusSemanticSegmentationValidator(
-            self.test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks
+            test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks
         )
 
     def label_loss_items(self, loss_items=None, prefix="train"):
@@ -82,14 +92,14 @@ class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer)
             prefix (str): Prefix for loss item keys.
             
         Returns:
-            dict: Dictionary with labeled loss items for semantic segmentation.
+            dict | list: Dictionary with labeled loss items if loss_items provided, otherwise list of keys.
         """
         # For semantic segmentation, we typically have a single loss
         keys = [f"{prefix}/loss"]
         if loss_items is not None:
             loss_items = [round(float(loss_items), 5)]
+            return dict(zip(keys, loss_items))
         else:
-            loss_items = [0.0]
-        return dict(zip(keys, loss_items))
+            return keys
 
 
