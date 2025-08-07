@@ -2,7 +2,7 @@ from typing import Dict, Any
 import torch
 
 
-def convert_instance_masks_to_semantic(batch: Dict[str, Any], ignore_index: int = 255) -> torch.Tensor:
+def convert_instance_masks_to_semantic(batch: Dict[str, Any], ignore_index: int = 255, num_classes: int = None) -> torch.Tensor:
     """
     Convert instance segmentation masks to semantic segmentation format.
     
@@ -17,6 +17,8 @@ def convert_instance_masks_to_semantic(batch: Dict[str, Any], ignore_index: int 
             - 'cls': 1D tensor of class labels for each instance
             - 'batch_idx': 1D tensor mapping each instance to its batch item
         ignore_index (int): Value for background/ignored pixels. Defaults to 255.
+        num_classes (int, optional): Number of valid classes. If None, no class validation is performed.
+                                   If provided, validates that class values are in range [0, num_classes-1].
         
     Returns:
         torch.Tensor: Semantic masks with shape [B, H, W] containing class indices.
@@ -107,12 +109,32 @@ def convert_instance_masks_to_semantic(batch: Dict[str, Any], ignore_index: int 
             unique_instances = torch.sort(unique_instances)[0]  # Sort to ensure consistent ordering
             
             # Map each unique instance ID to its corresponding class
-            for i, instance_id in enumerate(unique_instances):
-                if i < len(mask_instances):  # Bounds check
-                    class_val = mask_instances[i]
-                    if isinstance(class_val, torch.Tensor):
-                        class_val = class_val.item()
-                    id_to_class[instance_id.item()] = class_val
+            # CONVERSION PROCESS EXPLANATION:
+            # 1. YOLO instance format: mask pixels contain instance IDs (1, 2, 3, ...) where each ID represents a different object instance
+            # 2. mask_instances[i] contains the class label for the i-th instance in the current image
+            # 3. To convert to semantic segmentation: replace each instance ID with its corresponding class label
+            # 4. Instance IDs start from 1, but mask_instances array is 0-indexed, so instance_id-1 gives the correct array index
+            # 5. Result: all pixels of the same class get the same value, losing instance distinction but gaining semantic class info
+            # CORRECTED: Instance IDs start from 1, so instance_id maps to mask_instances[instance_id - 1]
+            for instance_id in unique_instances:
+                instance_id_val = instance_id.item()  # Convert once and reuse
+                instance_idx = instance_id_val - 1     # Convert to 0-based index
+                
+                if 0 <= instance_idx < len(mask_instances):  # Bounds check
+                    class_val = mask_instances[instance_idx].item()  # Direct conversion to int
+                    
+                    # Validate class value if num_classes is provided, then assign
+                    if num_classes is not None and not (0 <= class_val < num_classes):
+                        # Invalid class - treat as background/ignore
+                        print(f"Warning: Invalid class {class_val} (valid range: 0-{num_classes-1}), using ignore_index {ignore_index}")
+                        class_val = ignore_index
+                    
+                    # Single assignment point
+                    id_to_class[instance_id_val] = class_val
+                else:
+                    # Instance ID out of bounds - treat as ignore
+                    print(f"Warning: Instance ID {instance_id_val} out of bounds, using ignore_index {ignore_index}")
+                    id_to_class[instance_id_val] = ignore_index
             
             # Apply the mapping vectorized
             semantic_mask = id_to_class[mask_proc.long()]

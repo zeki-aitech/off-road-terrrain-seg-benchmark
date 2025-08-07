@@ -1,6 +1,7 @@
 # src/models/deeplabv3plus/train.py
 
 from copy import copy
+import torch
 
 # Apply monkey patches before importing Ultralytics
 # from src.patches import apply_patches
@@ -101,5 +102,15 @@ class DeepLabV3PlusSemanticSegmentationTrainer(yolo.segment.SegmentationTrainer)
             return dict(zip(keys, loss_items))
         else:
             return keys
+
+    def optimizer_step(self):
+        """Perform optimizer step with gradient clipping to prevent NaN issues."""
+        # Clip gradients to prevent exploding gradients that can cause NaN predictions
+        max_norm = 1.0  # Maximum gradient norm
+        if self.model.parameters():
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm)
+        
+        # Call parent optimizer step
+        super().optimizer_step()
 
 

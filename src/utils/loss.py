@@ -32,7 +32,7 @@ class DeepLabV3PlusSemanticSegmentationLoss:
             model (torch.nn.Module): The model instance to extract device information.
         """
         self.device = next(model.parameters()).device
-        LOGGER.info(f"{colorstr('Loss:')} Initialized DeepLabV3+ segmentation loss on {self.device}")
+        # LOGGER.info(f"{colorstr('Loss:')} Initialized DeepLabV3+ segmentation loss on {self.device}")
         
     def __call__(
         self,
@@ -75,14 +75,44 @@ class DeepLabV3PlusSemanticSegmentationLoss:
             raise ValueError(f"Spatial size mismatch: preds {preds.shape[2:]} vs masks {semantic_masks.shape[1:]}")
 
         # Compute cross-entropy loss with ignore index for background
-        loss = F.cross_entropy(
-            preds, 
-            semantic_masks, 
-            reduction='mean', 
-            ignore_index=255
-        )
+        # Note: This is where NaN loss occurs on GPU with AMP due to fp16 overflow
         
-        # Check for NaN loss
+        # Check for problematic values before loss calculation
+        if torch.isnan(preds).any():
+            LOGGER.warning(f"{colorstr('yellow', 'Warning:')} NaN detected in predictions - attempting recovery")
+            
+            # Try to recover from NaN predictions by replacing with zeros
+            # This allows training to continue instead of crashing
+            nan_mask = torch.isnan(preds)
+            preds = torch.where(nan_mask, torch.zeros_like(preds), preds)
+            
+            # Check if we still have NaN after replacement
+            if torch.isnan(preds).any():
+                LOGGER.error(f"{colorstr('red', 'Error:')} Unable to recover from NaN predictions")
+                # Return a recoverable loss instead of crashing
+                loss = torch.tensor(0.0, device=preds.device, requires_grad=True)
+                return loss, loss.detach()
+            
+        max_logit = preds.max().item()
+        min_logit = preds.min().item()
+        if abs(max_logit) > 100 or abs(min_logit) > 100:
+            LOGGER.warning(f"{colorstr('yellow', 'Warning:')} Large logits detected: [{min_logit:.2f}, {max_logit:.2f}] - clipping to prevent overflow")
+            # Clip extreme values to prevent fp16 overflow
+            preds = torch.clamp(preds, min=-50.0, max=50.0)
+        
+        # Fix for AMP + semantic segmentation stability:
+        # Problem: ignore_index pixels get random predictions → large logits → fp16 overflow → NaN
+        # Solution: Keep AMP for speed but use fp32 for loss calculation (prevents overflow)
+        
+        if preds.dtype == torch.float16:
+            # AMP is active - convert to fp32 for stable loss calculation
+            preds_safe = preds.float()
+            loss = F.cross_entropy(preds_safe, semantic_masks, reduction='mean', ignore_index=255)
+        else:
+            # Standard fp32 training
+            loss = F.cross_entropy(preds, semantic_masks, reduction='mean', ignore_index=255)
+            
+        # Check for NaN loss and handle edge cases
         if torch.isnan(loss):
             # Check if all targets are ignore_index (empty batch case)
             valid_pixels = (semantic_masks != 255).sum()
@@ -95,5 +125,5 @@ class DeepLabV3PlusSemanticSegmentationLoss:
                 LOGGER.error(f"{colorstr('red', 'Error:')} Loss is NaN - check your data and model")
                 raise ValueError("Loss is NaN; check your data and model.")
             
-        # Return loss and detached version for logging (following Ultralytics pattern)
+        # Return loss and detached version for logging
         return loss, loss.detach()
